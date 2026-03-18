@@ -13,18 +13,145 @@
         <link rel="stylesheet" href="css/leaflet-search.css">
         <link rel="stylesheet" href="css/leaflet.photon.css">
         <style>
-        html, body, #map {
+        /* CSS Tambahan untuk susun atur seperti gambar */
+        html, body {
             width: 100%;
             height: 100%;
             padding: 0;
             margin: 0;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            background-color: #1a1d20;
         }
+        
+        /* Header Hijau */
+        #header-top {
+            height: 50px;
+            background-color: #2d5a27;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-style: italic;
+            font-size: 22px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+            position: relative;
+        }
+
+        /* Container untuk Peta + Sidebar */
+        #main-wrapper {
+            display: flex;
+            height: calc(100% - 50px);
+            width: 100%;
+        }
+
+        /* Peta (Kiri) */
+        #map {
+            flex: 1;
+            height: 100%;
+            background: #f0f0f0;
+        }
+
+        /* Sidebar (Kanan) */
+        #sidebar {
+            width: 320px;
+            background-color: #212529;
+            color: #ffffff;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            border-left: 1px solid #333;
+        }
+
+        .section-title { font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; color: #ccc; }
+        .app-name { font-size: 14px; margin-bottom: 20px; font-weight: bold; color: #fff; }
+        
+        .input-group { margin-bottom: 10px; }
+        .input-box {
+            width: 100%;
+            padding: 10px;
+            background: #121416;
+            border: 1px solid #3a3f44;
+            color: white;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        /* Butang Sidebar */
+        .btn {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .btn-cari { background-color: #28a745; }
+        .btn-reset { background-color: #dc3545; }
+        .btn-export { background-color: #17a2b8; margin-top: 5px; }
+
+        /* Kotak Info (Data Lot) */
+        .info-card {
+            background: #2c3034;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            border-left: 5px solid #28a745;
+        }
+        .info-label { font-size: 10px; color: #9da5ad; text-transform: uppercase; margin-bottom: 4px; }
+        .info-value { font-size: 15px; font-weight: bold; color: #28a745; }
+
+        hr { border: 0.5px solid #3a3f44; width: 100%; margin: 15px 0; }
         </style>
-        <title></title>
+        <title>Smart Resident - Land Explorer</title>
     </head>
     <body>
-        <div id="map">
+        
+        <div id="header-top">
+            <span style="font-weight: normal;">smart resident</span>
         </div>
+
+        <div id="main-wrapper">
+            <div id="map"></div>
+
+            <div id="sidebar">
+                <div class="section-title">⚙ Tetapan Paparan</div>
+                <div class="app-name">🌍 Land Explorer</div>
+                
+                <div class="input-group">
+                    <input type="text" id="sidebar-search" class="input-box" placeholder="Masukkan No Lot (Contoh: 11462)">
+                </div>
+                
+                <button class="btn btn-cari">Cari Lot</button>
+                <button class="btn btn-reset">Reset Peta</button>
+                <button class="btn btn-export">📄 Export Detail + Map (PDF)</button>
+                
+                <hr>
+
+                <div class="info-card">
+                    <div class="info-label">Total Lot</div>
+                    <div class="info-value">67</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">No Lot Dipilih</div>
+                    <div class="info-value" id="val-no-lot">11462</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Nama Pemilik</div>
+                    <div class="info-value" id="val-pemilik">ALI BIN ABU</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Luas Lot</div>
+                    <div class="info-value" id="val-luas">106.825 m²</div>
+                </div>
+            </div>
+        </div>
+
         <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
         <script src="js/L.Control.Layers.Tree.min.js"></script>
@@ -50,9 +177,9 @@
             zoomControl:false, maxZoom:28, minZoom:1
         }).fitBounds([[2.1028963060046246,102.52135156932523],[2.104225402977651,102.52346295821242]]);
         var hash = new L.Hash(map);
-        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive wysiwyg">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
         var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
-        // remove popup's row if "visible-with-data"
+        
         function removeEmptyRowsFromPopupContent(content, feature) {
          var tempDiv = document.createElement('div');
          tempDiv.innerHTML = content;
@@ -66,7 +193,7 @@
          }
          return tempDiv.innerHTML;
         }
-        // modify popup if contains media
+
         function addClassToPopupIfMedia(content, popup) {
             var tempDiv = document.createElement('div');
             tempDiv.innerHTML = content;
@@ -98,7 +225,6 @@
                     video.style.maxWidth = "60vw";
                     imgTd.parentNode.replaceChild(video, imgTd);
                     popup._contentNode.classList.add('media');
-                    // Aggiorna il popup quando il video carica i metadati
                     video.addEventListener('loadedmetadata', function() {
                         popup.update();
                     });
@@ -165,10 +291,10 @@
                     </tr>\
                 </table>';
             var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-			layer.on('popupopen', function(e) {
-				addClassToPopupIfMedia(content, e.popup);
-			});
-			layer.bindPopup(content, { maxHeight: 400 });
+            layer.on('popupopen', function(e) {
+                addClassToPopupIfMedia(content, e.popup);
+            });
+            layer.bindPopup(content, { maxHeight: 400 });
         }
 
         function style_LOT_1_0() {
@@ -200,6 +326,7 @@
         });
         bounds_group.addLayer(layer_LOT_1);
         map.addLayer(layer_LOT_1);
+
         function pop_LOTFINAL_2(feature, layer) {
             layer.on({
                 mouseout: function(e) {
@@ -234,10 +361,10 @@
                     </tr>\
                 </table>';
             var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-			layer.on('popupopen', function(e) {
-				addClassToPopupIfMedia(content, e.popup);
-			});
-			layer.bindPopup(content, { maxHeight: 400 });
+            layer.on('popupopen', function(e) {
+                addClassToPopupIfMedia(content, e.popup);
+            });
+            layer.bindPopup(content, { maxHeight: 400 });
         }
 
         function style_LOTFINAL_2_0() {
@@ -269,6 +396,7 @@
         });
         bounds_group.addLayer(layer_LOTFINAL_2);
         map.addLayer(layer_LOTFINAL_2);
+
         function pop_TANDASEMPADANNEW_3(feature, layer) {
             layer.on({
                 mouseout: function(e) {
@@ -312,10 +440,10 @@
                     </tr>\
                 </table>';
             var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-			layer.on('popupopen', function(e) {
-				addClassToPopupIfMedia(content, e.popup);
-			});
-			layer.bindPopup(content, { maxHeight: 400 });
+            layer.on('popupopen', function(e) {
+                addClassToPopupIfMedia(content, e.popup);
+            });
+            layer.bindPopup(content, { maxHeight: 400 });
         }
 
         function style_TANDASEMPADANNEW_3_0() {
@@ -388,6 +516,6 @@
         map.on("layerremove", function(){
             resetLabels([layer_LOT_1]);
         });
-        </script>        
+        </script>
     </body>
 </html>
