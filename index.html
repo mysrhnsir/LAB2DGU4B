@@ -7,7 +7,7 @@
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
         
-        <title>Politeknik Land Explorer</title>
+        <title>Smart Community Map</title>
 
         <link rel="stylesheet" href="css/leaflet.css">
         <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
@@ -17,186 +17,208 @@
         <link rel="stylesheet" href="css/leaflet.photon.css">
         
         <style>
-            /* CSS untuk Susun Atur (Layout) */
+            /* Susun Atur Utama */
             html, body {
                 width: 100%;
                 height: 100%;
                 padding: 0;
                 margin: 0;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                overflow: hidden; /* Halang scroll bar pada badan halaman */
+                font-family: 'Arial', sans-serif;
+                overflow: hidden;
                 background-color: #1a1d20;
             }
             
-            /* Container Utama */
             #main-container {
                 display: flex;
                 flex-direction: column;
                 height: 100vh;
             }
 
-            /* 1. Header Hijau Gelap (Atas) */
+            /* Header Hijau (Sebiji Macam Gambar) */
             #header-top {
-                height: 70px;
-                background-color: #1e4620; /* Hijau gelap profesional */
+                height: 60px;
+                background-color: #2d5a27; /* Hijau Gelap */
                 display: flex;
                 align-items: center;
-                justify-content: flex-start; /* Alih ke kiri */
+                justify-content: center;
                 color: white;
-                padding: 0 20px;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.3);
                 z-index: 1000;
                 position: relative;
+                gap: 15px;
             }
-            
-            /* Gaya Logo Politeknik */
-            #poli-logo {
-                height: 50px; /* Sesuaikan ketinggian */
-                margin-right: 15px;
-                background: white; /* Kotak putih untuk logo */
-                padding: 5px;
+
+            .logo-box {
+                height: 40px;
+                background: white;
+                padding: 3px;
                 border-radius: 4px;
             }
 
-            /* Gaya Tajuk */
-            #header-title-wrapper {
-                letter-spacing: 0.5px;
-            }
-            #title-main {
-                font-weight: bold;
-                font-size: 20px;
-                color: white;
-            }
-            #title-sub {
-                font-weight: normal;
-                font-size: 18px;
-                color: #a3ff33; /* Hijau cerah untuk kontra */
-                margin-left: 5px;
+            /* Tajuk Smart Community Map */
+            .header-text {
+                letter-spacing: 1px;
+                font-size: 22px;
+                font-style: italic;
             }
 
-            /* 2. Container untuk Peta + Sidebar */
+            /* Container Peta & Sidebar */
             #content-wrapper {
                 display: flex;
-                flex: 1; /* Ambil baki ketinggian */
-                overflow: hidden;
+                flex: 1;
+                width: 100%;
             }
 
-            /* 3. Kawasan Peta (Kiri) */
             #map {
-                flex: 1; /* Ambil baki ruang lebar */
+                flex: 1;
                 height: 100%;
                 background: #f0f0f0;
             }
 
-            /* 4. Sidebar Panel (Kanan) */
+            /* Sidebar (Panel Kanan) */
             #sidebar {
                 width: 320px;
-                background-color: #212529; /* Warna gelap sidebar sebiji macam gambar */
+                background-color: #212529; /* Warna Gelap */
                 color: #ffffff;
                 padding: 20px;
                 display: flex;
                 flex-direction: column;
-                overflow-y: auto; /* Scroll dalam sidebar jika kandungan panjang */
-                border-left: 1px solid #3a3f44;
-                box-sizing: border-box;
+                overflow-y: auto;
+                border-left: 1px solid #333;
             }
 
-            /* Tajuk Bahagian dalam Sidebar */
-            .sidebar-section-title { 
-                font-size: 14px; 
-                margin-bottom: 15px; 
-                display: flex; 
-                align-items: center; 
-                gap: 8px; 
-                color: #9da5ad; 
-                text-transform: uppercase;
-                letter-spacing: 1px;
-            }
+            .section-title { font-size: 14px; margin-bottom: 15px; color: #ccc; display: flex; align-items: center; gap: 8px; }
+            .app-name { font-size: 15px; margin-bottom: 20px; font-weight: bold; color: #fff; }
             
-            /* Nama Aplikasi */
-            .app-name { 
-                font-size: 16px; 
-                margin-bottom: 20px; 
-                font-weight: bold; 
-                color: #fff; 
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-            
-            /* Input Box Sebiji Macam Gambar */
-            .input-group { margin-bottom: 15px; }
+            .input-group { margin-bottom: 10px; }
             .input-box {
                 width: 100%;
-                padding: 12px;
+                padding: 10px;
                 background: #121416;
                 border: 1px solid #3a3f44;
                 color: white;
                 border-radius: 4px;
                 box-sizing: border-box;
-                font-size: 14px;
             }
-            .input-box::placeholder { color: #555; }
 
             /* Butang Sidebar */
             .btn {
                 width: 100%;
                 padding: 12px;
-                margin-bottom: 10px;
+                margin-bottom: 8px;
                 border: none;
                 border-radius: 4px;
                 color: white;
                 font-weight: bold;
                 cursor: pointer;
-                font-size: 13px;
-                transition: background 0.2s;
             }
-            .btn-cari { background-color: #28a745; } /* Hijau */
-            .btn-cari:hover { background-color: #218838; }
-            
-            .btn-reset { background-color: #dc3545; } /* Merah */
-            .btn-reset:hover { background-color: #c82333; }
-            
-            .btn-export { background-color: #17a2b8; margin-top: 5px; } /* Biru */
-            .btn-export:hover { background-color: #138496; }
+            .btn-cari { background-color: #28a745; }
+            .btn-reset { background-color: #dc3545; }
+            .btn-export { background-color: #17a2b8; }
 
-            /* Kotak Info (Data Card) */
+            /* Kotak Info Data Lot */
             .info-card {
                 background: #2c3034;
-                padding: 15px;
+                padding: 12px;
                 border-radius: 6px;
                 margin-bottom: 12px;
-                border-left: 5px solid #28a745; /* Garis hijau di kiri */
-                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                border-left: 5px solid #28a745;
             }
-            .info-label { 
-                font-size: 11px; 
-                color: #9da5ad; 
-                text-transform: uppercase; 
-                margin-bottom: 5px; 
-                letter-spacing: 0.5px;
-            }
-            .info-value { 
-                font-size: 16px; 
-                font-weight: bold; 
-                color: #28a745; /* Warna nilai hijau cerah */
-            }
+            .info-label { font-size: 10px; color: #9da5ad; text-transform: uppercase; margin-bottom: 4px; }
+            .info-value { font-size: 15px; font-weight: bold; color: #28a745; }
 
-            /* Garis Pemisah */
-            hr { border: 0.5px solid #3a3f44; width: 100%; margin: 20px 0; }
+            hr { border: 0.5px solid #3a3f44; width: 100%; margin: 15px 0; }
         </style>
     </head>
     <body>
         
         <div id="main-container">
             <div id="header-top">
-                <img src="https://via.placeholder.com/150x50?text=POLITEKNIK+LOGO" id="poli-logo" alt="Politeknik Logo">
-                
-                <div id="header-title-wrapper">
-                    <span id="title-main">Politeknik</span>
-                    <span id="title-sub">Land Explorer</span>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/b/be/Politeknik_Malaysia.png" class="logo-box" alt="Logo Politeknik">
+                <div class="header-text">
+                    <span style="font-weight: normal; color: white;">smart</span>
+                    <span style="font-weight: normal; color: white;">resident</span>
                 </div>
             </div>
 
             <div id="content-wrapper">
-                
+                <div id="map"></div>
+
+                <div id="sidebar">
+                    <div class="section-title"><i class="fas fa-cog"></i> Tetapan Paparan</div>
+                    <div class="app-name">🌍 Land Explorer</div>
+                    
+                    <div class="input-group">
+                        <label style="font-size: 10px; color: #888;">CARIAN NO LOT</label>
+                        <input type="text" id="sidebar-search" class="input-box" placeholder="11462">
+                    </div>
+                    
+                    <button class="btn btn-cari">Cari Lot</button>
+                    <button class="btn btn-reset">Reset Peta</button>
+                    <button class="btn btn-export">📄 Export Detail + Map (PDF)</button>
+                    
+                    <hr>
+
+                    <div class="info-card">
+                        <div class="info-label">Total Lot</div>
+                        <div class="info-value">67</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">No Lot Dipilih</div>
+                        <div class="info-value" id="val-no-lot">11462</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">Nama Pemilik</div>
+                        <div class="info-value" id="val-pemilik" style="color: #fff;">ALI BIN ABU</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">Luas Lot</div>
+                        <div class="info-value" id="val-luas">106.825 m²</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet.photon.js"></script>
+        <script src="js/leaflet-search.js"></script>
+        
+        <script src="data/LOT_1.js"></script>
+        <script src="data/LOTFINAL_2.js"></script>
+        <script src="data/TANDASEMPADANNEW_3.js"></script>
+        
+        <script>
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        }).fitBounds([[2.102896,102.521351],[2.104225,102.523462]]);
+        
+        var layer_GoogleSatellite = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+            opacity: 1.0, attribution: ''
+        }).addTo(map);
+
+        // Kod di bawah adalah untuk memaparkan data GeoJSON anda
+        function style_LOT_1_0() {
+            return { color: 'rgba(35,35,35,1.0)', weight: 1.0, fill: true, fillColor: 'rgba(229,182,54,1.0)' };
+        }
+        
+        var layer_LOT_1 = new L.geoJson(json_LOT_1, {
+            style: style_LOT_1_0,
+            onEachFeature: function(feature, layer) {
+                layer.bindPopup('No Lot: ' + feature.properties['NO_LOT']);
+            }
+        }).addTo(map);
+
+        // Tambah kawalan zoom di atas kiri
+        L.control.zoom({ position: 'topleft' }).addTo(map);
+        </script>
+    </body>
+</html>
